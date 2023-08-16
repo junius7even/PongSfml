@@ -9,8 +9,8 @@ using namespace sf;
 
 Player::Player(int xPosition, int yPosition, int width, int length, sf::Color fillColor, sf::Color outlineColor) {
     // playerRect.setPosition(Vector2f(xPosition, yPosition));
-    playerRect = sf::RectangleShape(Vector2f(width, length));
-    playerRect.setPosition(xPosition, yPosition);
+    playerRect = sf::RectangleShape(Vector2f((float)width, (float)length));
+    playerRect.setPosition((float)xPosition, (float)yPosition);
     playerRect.setOutlineColor(outlineColor);
     playerRect.setFillColor(fillColor);
     playerRect.setOrigin(((float)width)/2, ((float)length)/2);
@@ -18,7 +18,7 @@ Player::Player(int xPosition, int yPosition, int width, int length, sf::Color fi
 }
 
 void Player::Move(int x, int y) {
-    playerRect.move(x, y);
+    playerRect.move((float)x, (float)y);
 }
 
 Player::Player() {

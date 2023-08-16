@@ -18,8 +18,11 @@ Engine::Engine() {
     playerMoveSpeed = 2;
     playerOne = Player(resolution.x/10, resolution.y/2, 30, 130, Color::Magenta,Color::White);
     playerTwo = Player(resolution.x/10 * 9, resolution.y/2, 30, 130, Color::Blue,Color::White);
+
+    pongBall = Ball(ballSize, Color::White);
+    pongBall.ballShape.setPosition(resolution.x/2, resolution.y/2);
+
     currentGameState = GameState::RESET;
-    StartGame();
 }
 
 
@@ -34,7 +37,11 @@ void Engine::Run() {
                 }
             }
         }
+        HandlePhysics();
         HandleControls();
+
+        if (GameState::PLAYING)
+            pongBall.moveBall();
 
         window.clear(Color::Black);
         Draw();
@@ -49,6 +56,9 @@ void Engine::Draw() {
     window.draw(titleText);
     window.draw(playerOne.playerRect);
     window.draw(playerTwo.playerRect);
+    // Draw Ball
+    if (currentGameState == GameState::PLAYING)
+        window.draw(pongBall.ballShape);
 
     // Draw walls
 
@@ -63,38 +73,37 @@ void Engine::Draw() {
 }
 
 void Engine::HandleControls() {
+    if (Keyboard::isKeyPressed(Keyboard::P))
+        swapStates(currentGameState == GameState::PAUSED ? GameState::PLAYING : GameState::PAUSED);
+
+    if (currentGameState == GameState::PAUSED)
+        return;
+
     playerOneControls();
     playerTwoControls();
-    if (Keyboard::isKeyPressed(Keyboard::W)) {
-
+    if (Keyboard::isKeyPressed(Keyboard::R)) {
+        StartGame();
+        swapStates(GameState::PLAYING);
     }
+
 }
 
 void Engine::playerControls(RectangleShape &rectToMove, float moveSpeed) {
-//    if (Keyboard::isKeyPressed(Keyboard::A)) {
-//        rectToMove.move(Vector2f(-moveSpeed, 0));
-//    }
+
     if (Keyboard::isKeyPressed(Keyboard::S)) {
         rectToMove.move(Vector2f(0, moveSpeed));
     }
-//    if (Keyboard::isKeyPressed(Keyboard::D)) {
-//        rectToMove.move(Vector2f(moveSpeed, 0));
-//    }
+
     if (Keyboard::isKeyPressed(Keyboard::W)) {
         rectToMove.move(Vector2f(0, -moveSpeed));
     }
 }
 
 void Engine::playerOneControls() {
-//    if (Keyboard::isKeyPressed(Keyboard::A)) {
-//        playerOne.playerRect.move(Vector2f(-playerMoveSpeed, 0));
-//    }
     if (Keyboard::isKeyPressed(Keyboard::S)) {
         playerOne.playerRect.move(Vector2f(0, playerMoveSpeed));
     }
-//    if (Keyboard::isKeyPressed(Keyboard::D)) {
-//        playerOne.playerRect.move(Vector2f(playerMoveSpeed, 0));
-//    }
+
     if (Keyboard::isKeyPressed(Keyboard::W)) {
         playerOne.playerRect.move(Vector2f(0, -playerMoveSpeed));
     }
@@ -106,17 +115,17 @@ void Engine::playerTwoControls() {
     if (Keyboard::isKeyPressed(Keyboard::Down)) {
         playerTwo.playerRect.move(Vector2f(0, playerMoveSpeed));
     }
-//    if (Keyboard::isKeyPressed(Keyboard::Left)) {
-//        playerTwo.playerRect.move(Vector2f(playerMoveSpeed, 0));
-//    }
-//    if (Keyboard::isKeyPressed(Keyboard::Right)) {
-//        playerTwo.playerRect.move(Vector2f(0, -playerMoveSpeed));
-//    }
+}
+
+void Engine::resetBall() {
+    pongBall = Ball(ballSize, Color::White);
+    pongBall.changeDirection(Vector2f(-1, 0));
+    pongBall.ballShape.setPosition(resolution.x/2, resolution.y/2);
+    pongBall.changeSpeed(ballSpeed);
 }
 
 void Engine::StartGame() {
-
-
+    resetBall();
 }
 
 void Engine::setupText(sf::Text *textItem, const Font &font, const string &value, int size, sf::Color colour) {
@@ -125,3 +134,14 @@ void Engine::setupText(sf::Text *textItem, const Font &font, const string &value
     textItem->setCharacterSize(size);
     textItem->setFillColor(colour);
 }
+
+void Engine::swapStates(Engine::GameState nextGameState) {
+    lastGameState = currentGameState;
+    currentGameState = nextGameState;
+}
+
+void Engine::HandlePhysics() {
+    if (currentGameState == GameState::PLAYING)
+        pongBall.moveBall();
+}
+

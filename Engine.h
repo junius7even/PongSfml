@@ -6,6 +6,7 @@
 #define PONG_ENGINE_H
 #include <SFML/Graphics.hpp>
 #include "Player.h"
+#include "Ball.h"
 using namespace sf;
 using namespace std;
 
@@ -14,12 +15,16 @@ public:
     enum GameState {RESET, PAUSED, PLAYING};
     Engine();
     void Run();
-    void Draw();
-    void HandleControls();
+
+
+
 private:
+    const unsigned int ballSize = 10;
+
     Vector2f resolution;
     RenderWindow window;
     const unsigned int FPS = 60;
+    const float ballSpeed = 2;
     static const Time TimePerFrame;
 
     Font mainFont;
@@ -32,14 +37,21 @@ private:
     int lastGameState;
 
     void StartGame();
+    void Draw();
+    void HandleControls();
+    void HandlePhysics();
     void setupText(sf::Text *textItem, const sf::Font &font, const std::string &value, int size, sf::Color colour);
 
-    void swapStates();
+    void swapStates(GameState nextGameState);
 
     float playerMoveSpeed;
     void playerControls(RectangleShape &rectToMove, float moveSpeed);
     void playerOneControls();
     void playerTwoControls();
+
+    void resetBall();
+
+    Ball pongBall;
 
     Player playerOne;
     Player playerTwo;

@@ -1,9 +1,11 @@
 //
 // Created by Junius7 on 2023-08-11.
 //
+#define _USE_MATH_DEFINES
 
 #include "Engine.h"
 #include <iostream>
+#include <cmath>
 
 Engine::Engine() {
     resolution = Vector2f(800, 600);
@@ -15,12 +17,15 @@ Engine::Engine() {
     titleText.setOrigin(titleText.getLocalBounds().width/2, titleText.getLocalBounds().height/2 + 45);
     titleText.setPosition(resolution.x/2, resolution.y/2);
 
-    playerMoveSpeed = 2;
     playerOne = Player(resolution.x/10, resolution.y/2, 30, 130, Color::Magenta,Color::White);
     playerTwo = Player(resolution.x/10 * 9, resolution.y/2, 30, 130, Color::Blue,Color::White);
 
     pongBall = Ball(ballSize, Color::White);
     pongBall.ballShape.setPosition(resolution.x/2, resolution.y/2);
+
+    topWall = RectangleShape(Vector2f(resolution.x, resolution.y/12));
+    botWall = RectangleShape(Vector2f(resolution.x, resolution.y/12));
+    botWall.setPosition(botWall.getPosition().x, resolution.y/12 * 11);
 
     currentGameState = GameState::RESET;
 }
@@ -62,9 +67,7 @@ void Engine::Draw() {
 
     // Draw walls
 
-    RectangleShape topWall = RectangleShape(Vector2f(resolution.x, resolution.y/12));
-    RectangleShape botWall = RectangleShape(Vector2f(resolution.x, resolution.y/12));
-    botWall.setPosition(botWall.getPosition().x, resolution.y/12 * 11);
+
     setupWall(topWall);
     setupWall(botWall);
 
@@ -143,5 +146,41 @@ void Engine::swapStates(Engine::GameState nextGameState) {
 void Engine::HandlePhysics() {
     if (currentGameState == GameState::PLAYING)
         pongBall.moveBall();
+    else
+        return;
+    // Check ball collision with player rects
+    playerRectCollision(playerOne.playerRect);
+    playerRectCollision(playerTwo.playerRect);
+    // Wall collisions
+    wallRectCollision(topWall);
+    wallRectCollision(botWall);
 }
 
+void Engine::playerRectCollision(RectangleShape& playerRect) {
+    Rect<float> ballBounds = pongBall.ballShape.getGlobalBounds();
+    Rect<float> playerBounds = playerRect.getGlobalBounds();
+    if (ballBounds.intersects(playerBounds))
+    {
+        float dy = pongBall.ballShape.getPosition().y - playerRect.getPosition().y;
+        float dx = pongBall.ballShape.getPosition().x - playerRect.getPosition().x;
+        if (abs(dx) <= abs(playerRect.getSize().x / 2)) {
+            pongBall.changeDirection(Vector2f(pongBall.direction.x, -pongBall.direction.y));
+        }
+        else
+        {
+            cout<<"Player y: "<<playerRect.getSize().y<<endl;
+            // Sfml origin is top left corner so
+            float newY = tan((dy/(playerRect.getSize().y/2)) * (maxBounceAngle/90.0f * M_PI/2)) * abs(pongBall.direction.x);
+            float newX = 0;
+            cout<<"New thing: " <<newY  <<endl;
+            pongBall.changeDirection(Vector2f(-pongBall.direction.x, pongBall.direction.y + newY));
+        }
+        pongBall.speedupValue *= 1.1;
+    }
+}
+
+void Engine::wallRectCollision(RectangleShape& wallRect) {
+    if (pongBall.ballShape.getGlobalBounds().intersects(wallRect.getGlobalBounds())) {
+        pongBall.changeDirection(Vector2f(pongBall.direction.x, -pongBall.direction.y));
+    }
+}

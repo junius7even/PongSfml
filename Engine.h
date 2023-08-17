@@ -44,15 +44,22 @@ private:
 
     void swapStates(GameState nextGameState);
 
-    float playerMoveSpeed;
+    const float playerMoveSpeed = 4;
     void playerControls(RectangleShape &rectToMove, float moveSpeed);
     void playerOneControls();
     void playerTwoControls();
+
+    void wallRectCollision(RectangleShape& wallRect);
+    void playerRectCollision(RectangleShape& playerRect);
 
     void resetBall();
 
     Ball pongBall;
 
+    RectangleShape topWall;
+    RectangleShape botWall;
+
+    float maxBounceAngle = 85;
     Player playerOne;
     Player playerTwo;
 };

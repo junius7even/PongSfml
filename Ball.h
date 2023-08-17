@@ -16,9 +16,12 @@ public:
     Ball(int size, Color color);
     void changeDirection(Vector2f velocityVector);
     void moveBall();
-    void changeSpeed(float newSpeed);
-private:
     Vector2f direction;
+    void changeSpeed(float newSpeed);
+    float speedupValue = 0.5;
+
+private:
+
     float baseSpeed = 3;
     float speed;
 };

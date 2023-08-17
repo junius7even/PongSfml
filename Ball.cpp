@@ -16,7 +16,9 @@ Ball::Ball(int size, Color color) {
 }
 
 void Ball::changeDirection(Vector2f velocityVector) {
-    direction = velocityVector/sqrt(velocityVector.x * velocityVector.x + velocityVector.y * velocityVector.y);
+    float magnitude = sqrt(velocityVector.x * velocityVector.x + velocityVector.y * velocityVector.y);
+    direction = velocityVector/magnitude;
+    speed = baseSpeed + speedupValue;
 }
 
 void Ball::moveBall() {
